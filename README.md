@@ -64,11 +64,11 @@ Connect to your PostgreSQL server and execute the scripts in the following order
 -- Example from 01_schema_creation.sql
 CREATE SCHEMA IF NOT EXISTS oltp;
 CREATE SCHEMA IF NOT EXISTS marts;
+```
 
-### Data Loading
+### 2. Data Loading
 
 Load the raw data files from the `01_database_setup/03_data_loading/` folder into their corresponding tables within the oltp schema.
 
 ---
 
-## 🛠️ Phase 2
