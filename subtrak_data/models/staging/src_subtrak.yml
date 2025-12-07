@@ -1,0 +1,83 @@
+version: 2
+
+sources:
+  - name: subtrak_oltp
+    schema: oltp
+    tables:
+
+      - name: customers
+        tests:
+          - unique:
+              column_name: id
+          - not_null:
+              column_name: id
+
+
+      - name: reps
+        tests:
+          - unique:
+              column_name: id
+          - not_null:
+              column_name: id
+
+
+      - name: contracts
+        tests:
+          - unique:
+              column_name: id
+          - not_null:
+              column_name: customer_id
+          - not_null:
+              column_name: deal_id
+          - not_null:
+              column_name: rep_id
+
+
+      - name: deals
+        tests:
+          - unique:
+              column_name: deal_id
+          - not_null:
+              column_name: deal_id
+
+
+      - name: regions
+        tests:
+          - unique:
+              column_name: id
+          - not_null:
+              column_name: id
+
+
+      - name: payments
+        tests:
+          - unique:
+              column_name: id
+          - not_null:
+              column_name: id
+
+
+models:
+  - name: stg_contracts
+    config:
+      schema: staging
+
+  - name: stg_customers
+    config:
+      schema: staging
+
+  - name: stg_reps
+    config:
+      schema: staging
+
+  - name: stg_deals
+    config:
+      schema: staging
+
+  - name: stg_regions
+    config:
+      schema: staging
+
+  - name: stg_payments
+    config:
+      schema: staging

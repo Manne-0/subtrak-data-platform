@@ -1,0 +1,133 @@
+version: 2
+
+models:
+  - name: billing_cycles
+    description: "Generates expected 30-day billing cycles for subscription contracts."
+    columns:
+      - name: contract_id
+        description: "Unique contract identifier"
+        tests:
+          - not_null
+      - name: start_date
+        description: "Sign up date for contracts"    
+      - name: billing_date
+        description: "Expected date of billing event"
+      - name: billing_no
+        description: "Sequential billing cycle number"
+      - name: deal_duration
+        description: "Expected payment months for this contract"
+
+
+
+  - name: payment_log
+    description: >
+      Payment-level analytics model that contains cumulative payments, 
+      expected paid months, paid months, payment deltas, and billing alignment 
+      for subscription contracts. Derived from stg_payments, stg_deals, and stg_contracts.
+
+    columns:
+      - name: contract_id
+        description: "Unique contract identifier associated with the payment."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_contracts')
+              field: contract_id
+
+      - name: start_date
+        description: "Date when the contract came into the business."
+        tests:
+          - not_null
+
+      - name: payment_date
+        description: "Date when the payment was recorded."
+        tests:
+          - not_null
+
+      - name: paid_months
+        description: "Actual cycle count based on cumulative revenue relative to monthly fee."
+
+      - name: total_paid
+        description: "Running cumulative total of all payments for the contract as of the payment date."
+        tests:
+          - not_null
+
+      - name: paid_diff
+        description: "Difference between paid_months at different payment date (indicates an advanced or one payment). Used for billing alignment and cycle expansion."
+
+      - name: payment_rank
+        description: "payment counts or No. (used for billing alignment)."
+
+
+
+  - name: contract_acq
+    description: >
+      Fact table at contract-level granularity capturing acquisition performance. 
+      Includes deal type, cost price, setup amount, commission rate, commission amount, 
+      acquisition month, rep, region, and customer linkages. 
+      Serves as a central fact for sales, incentive, and performance analytics.
+
+    columns:
+      - name: contract_id
+        description: "Primary business key representing each contract."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('stg_contracts')
+              field: contract_id
+
+      - name: sales_rep_id
+        description: "Identifier of the representative responsible for acquiring the contract."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_reps')
+              field: rep_id
+
+      - name: region_id
+        description: "Region assigned to the rep responsible for the contract."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_regions')
+              field: id
+
+      - name: customer_id
+        description: "Identifier of the customer who owns the contract."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: id
+
+      - name: start_date
+        description: "Date when the contract came into the business."
+
+      - name: deal_id
+        description: "Identifier of the type of deal (one-off or subscription)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_deals')
+              field: deal_id
+
+      - name: plan
+        description: "Readable label of deal type (e.g., One-off, Subscription)."
+        tests:
+          - accepted_values:
+              values: ['One-Time Purchase', 'Subscription']
+
+      - name: cost_price
+        description: "Full cost of the product."
+
+      - name: setup_amount
+        description: "Initial upfront fee for subscription deals."
+
+      - name: commission_rate
+        description: "Commission percentage applied based on deal type (5% or 17.5%)."
+
+      - name: commission_amount
+        description: "The actual monetary value paid as commission for closing the contract."
+        tests:
+          - not_null
