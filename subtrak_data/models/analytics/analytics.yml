@@ -21,13 +21,18 @@ models:
 
   - name: payment_log
     description: >
-      Payment-level analytics model that contains cumulative payments, 
-      expected paid months, paid months, payment deltas, and billing alignment 
-      for subscription contracts. Derived from stg_payments, stg_deals, and stg_contracts.
+      Tracks payments converted to "paid months" - handles irregular payment amounts and converts them into standardized monthly periods.
+
+      **Key Logic**:
+      - Cumulative payment tracking
+      - Paid months calculation based on total_paid vs monthly_payment
+      - Uses generate_series to expand to individual month records
 
     columns:
       - name: contract_id
-        description: "Unique contract identifier associated with the payment."
+        description: >
+           Unique contract identifier associated with the payment. 
+           Foreign key to contracts
         tests:
           - not_null
           - relationships:
@@ -45,7 +50,9 @@ models:
           - not_null
 
       - name: paid_months
-        description: "Actual cycle count based on cumulative revenue relative to monthly fee."
+        description: "Cumulative months paid (calculated from total_paid / monthly_payment)"
+        tests:
+          - not_null
 
       - name: total_paid
         description: "Running cumulative total of all payments for the contract as of the payment date."
@@ -83,7 +90,7 @@ models:
           - not_null
           - relationships:
               to: ref('stg_reps')
-              field: rep_id
+              field: sales_rep_id
 
       - name: region_id
         description: "Region assigned to the rep responsible for the contract."
@@ -91,7 +98,7 @@ models:
           - not_null
           - relationships:
               to: ref('stg_regions')
-              field: id
+              field: region_id
 
       - name: customer_id
         description: "Identifier of the customer who owns the contract."
@@ -99,7 +106,7 @@ models:
           - not_null
           - relationships:
               to: ref('stg_customers')
-              field: id
+              field: customer_id
 
       - name: start_date
         description: "Date when the contract came into the business."
@@ -116,7 +123,7 @@ models:
         description: "Readable label of deal type (e.g., One-off, Subscription)."
         tests:
           - accepted_values:
-              values: ['One-Time Purchase', 'Subscription']
+              values: ['One-Time Purchase', 'Subscription Plan']
 
       - name: cost_price
         description: "Full cost of the product."
@@ -131,3 +138,62 @@ models:
         description: "The actual monetary value paid as commission for closing the contract."
         tests:
           - not_null
+
+
+
+  - name: fct_billing_cycle
+    description: >
+      Tracks expected vs actual payments for each contract billing cycle.
+      Core table for understanding payment behavior, compliance, and rep performance.
+          
+      **Grain**: One row per contract per billing cycle (monthly for installment plans)
+          
+      **Business Logic**:
+      - 30-day billing cycles
+      - Cycle 0 = upfront payment
+      - Cycles 1-N = monthly installments
+      - Grace period: 5 days for rep incentive eligibility
+
+      **Payment Timing Categories**:
+      - On-time: Paid on or before due date
+      - Grace period: Paid 1-5 days after due date (still qualifies for incentive)
+      - Late: Paid 6+ days after due date
+
+    columns:
+      - name: contract_id
+        description: "Foreign key to stg_contracts"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_contracts')
+              field: contract_id
+
+      - name: cycle_number
+        description: "Billing cycle number (1=setup + first repayment, 2-12 = monthly repayment)"
+        tests:
+          - not_null
+
+      - name: due_date
+        description: "Date when payment is due"
+        tests:
+          - not_null
+
+      - name: expected_amount
+        description: "Amount expected to be paid in cycle"
+        tests:
+          - not_null
+
+      - name: payment_date
+        description: "Actual date payment was made (null if unpaid)"
+
+      - name: amount_paid
+        description: "Actual amount paid in the cycle. Null if unpaid."
+
+
+      - name: payment_timing
+        description: "Payment timing category: on-time, grace_period, late, or null if unpaid"
+        tests:
+          - accepted_values:
+              values: ['on-time', 'grace_period', 'late']
+              config:
+                where: "payment_timing is not null"
