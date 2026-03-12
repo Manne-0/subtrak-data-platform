@@ -1,24 +1,6 @@
 version: 2
 
 models:
-  - name: billing_cycles
-    description: "Generates expected 30-day billing cycles for subscription contracts."
-    columns:
-      - name: contract_id
-        description: "Unique contract identifier"
-        tests:
-          - not_null
-      - name: start_date
-        description: "Sign up date for contracts"    
-      - name: billing_date
-        description: "Expected date of billing event"
-      - name: billing_no
-        description: "Sequential billing cycle number"
-      - name: deal_duration
-        description: "Expected payment months for this contract"
-
-
-
   - name: payment_log
     description: >
       Tracks payments converted to "paid months" - handles irregular payment amounts and converts them into standardized monthly periods.
