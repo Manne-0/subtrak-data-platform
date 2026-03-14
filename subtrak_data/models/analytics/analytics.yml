@@ -179,3 +179,95 @@ models:
               values: ['on-time', 'grace_period', 'late']
               config:
                 where: "payment_timing is not null"
+
+
+  - name: contract_status_current
+    description: |
+      **Contract Status Current** (adapted for payment_log)
+      
+      Single source of truth for current contract status and health metrics.
+      
+      **Grain**: One row per contract
+      
+      **System Status** (application-driven):
+      - Enabled: Service active (current date < next due date)
+      - Locked: Service suspended (payment overdue)
+      - Retrieved: System repossessed from customer
+      - Completed: All payments made
+      
+      **Business Status** (analytics classification):
+      - Active: Contract ongoing, not in severe default
+      - Owner: Completed all payments and past contract end date
+      - Lost: 61+ days in default (business write-off)
+      - Retrieved: Physically repossessed
+      
+      
+    # tests:
+    #   - dbt_utils.expression_is_true:
+    #       expression: "total_amount_paid <= total_contract_value"
+    #       config:
+    #         severity: error
+      
+
+ 
+    columns:
+      - name: contract_id
+        description: "Unique contract identifier. Foreign key to stg_contracts"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_contracts')
+              field: contract_id
+
+      - name: customer_id
+        description: "Foreign key to customer"
+        tests:
+          - not_null
+
+      - name: sales_rep_id
+        description: "Foreign key to sales representative"
+        tests:
+          - not_null
+
+      - name: total_billing_cycles
+        description: "billing cycles for the duration of contract. Equals to contract duration"
+
+
+      - name: cycles_paid
+        description: "Count of cycles paid for."
+
+      - name: total_amount_paid
+        description: "Total amount paid till date"
+
+
+      - name: total_amount_outstanding
+        description: "Total amount still owed"
+
+      - name: ontime_payment
+        description: "Count of times contract paid on time"
+
+      - name: last_due_date
+        description: "last billing date with payment"
+
+      - name: last_payment_date
+        description: "Date of last payment"        
+
+      - name: days_overdue
+        description: "Days overdue for payment. (0 if current or owner)"
+        tests:
+          - not_null
+      
+      - name: system_status
+        description: "Current system status: enabled, locked, or completed"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['enabled', 'locked', 'completed', 'unknown']
+    
+      - name: contract_status
+        description: "Business classification: active, owner, lost"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['active', 'owner', 'lost']
+  
