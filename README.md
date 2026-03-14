@@ -391,7 +391,7 @@ stg_payments ──────→ payment aggregations ─────┴──
 **Chidinma Okoro**
 - Email: okoromannie@gmail.com
 - LinkedIn: [\[Chidinma Okoro\]](https://www.linkedin.com/in/chidinma-okoro/)
-- GitHub: [Your GitHub]
+
 
 ---
 
@@ -404,6 +404,6 @@ This project is for portfolio demonstration purposes.
 ## 🙏 Acknowledgments
 
 
-**Project completed**: [Date]
+**Project completed**: [ongoing]
 **dbt version**: 1.0+
 **Database**: PostgreSQL 14
