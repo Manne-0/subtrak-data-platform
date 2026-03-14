@@ -390,7 +390,7 @@ stg_payments ──────→ payment aggregations ─────┴──
 
 **Chidinma Okoro**
 - Email: okoromannie@gmail.com
-- LinkedIn: [\[Your LinkedIn\]](https://www.linkedin.com/in/chidinma-okoro/)
+- LinkedIn: [\[Chidinma Okoro\]](https://www.linkedin.com/in/chidinma-okoro/)
 - GitHub: [Your GitHub]
 
 ---
