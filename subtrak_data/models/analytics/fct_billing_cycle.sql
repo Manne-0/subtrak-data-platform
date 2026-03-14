@@ -36,7 +36,7 @@ billing_schedule as
 
     gs.cycle_number,
 
-    (c.start_date + (gs.cycle_number - 1) * interval '30 days') as due_date,
+    (c.start_date + (gs.cycle_number - 1) * interval '30 days')::date as due_date,
 
     case
         when gs.cycle_number = 1
