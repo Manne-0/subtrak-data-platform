@@ -42,7 +42,7 @@ billing_schedule as
         when gs.cycle_number = 1
         then d.setup_amount
         else d.monthly_payment
-        end as expected_amount
+    end as expected_amount
 
 from contracts c
 join deals d using(deal_id)
