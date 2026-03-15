@@ -84,11 +84,18 @@ contract_status as
 			when cm.total_billing_cycles = cm.cycles_paid and current_date >= c.start_date + (d.deal_duration * interval '30 days') then 'owner'
 			when cm.total_billing_cycles = cm.cycles_paid and current_date < c.start_date + (d.deal_duration * interval '30 days') then 'active'
 			else 'active'
-		end as contract_status
+		end as contract_status,
+
+        case 
+            when days_overdue >= 61 then 'high_risk'
+            when days_overdue >= 30 then 'medium_risk'
+            when days_overdue >= 6 then 'low_risk'
+            else 'good_standing'
+        end as risk_category
 
 	from contracts c
 	join deals d on c.deal_id = d.deal_id
-	left join contract_metrics cm on c.contract_id = cm.contract_id
+	join contract_metrics cm on c.contract_id = cm.contract_id
 		
 )
 select 

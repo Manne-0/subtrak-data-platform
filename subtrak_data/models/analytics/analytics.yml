@@ -200,6 +200,12 @@ models:
       - Owner: Completed all payments and past contract end date
       - Lost: 61+ days in default (business write-off)
       - Retrieved: Physically repossessed
+
+      **Risk Categories**:
+      - Good standing: 0-5 days overdue
+      - Low risk: 6-30 days overdue
+      - Medium risk: 31-60 days overdue
+      - High risk: 61+ days overdue
       
       
     # tests:
@@ -270,4 +276,11 @@ models:
           - not_null
           - accepted_values:
               values: ['active', 'owner', 'lost']
-  
+
+      - name: risk_category
+        description: "Risk level: good_standing, low_risk, medium_risk, high_risk"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['good_standing', 'low_risk', 'medium_risk', 'high_risk']
+   
