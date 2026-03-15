@@ -13,7 +13,7 @@
 
 The company operates a hybrid business model:
 - **Outright purchases**: Full payment upfront
-- **12-month installment plans**: Upfront payment + 12 monthly installments (30-day cycles)
+- **12-month installment plans**: Upfront payment + 11 monthly installments (30-day cycles)
 - **Regional sales network**: Performance-based rep incentive structure
 - **Solar power products**: Critical infrastructure requiring consistent payment compliance
 
@@ -101,7 +101,7 @@ Master dimension with all contract attributes including customer, rep, region, a
 Tracks expected vs actual payments for each billing period with detailed payment behavior metrics.
 
 **Key Fields**:
-- Cycle identification (cycle_number: 0 = upfront, 1-12 = monthly)
+- Cycle identification (cycle_number: 1 = upfront, 2-12 = monthly)
 - Expected vs actual amounts
 - Payment timing (on_time, grace_period, late)
 - Days from due date (negative = early, positive = late)
@@ -170,6 +170,26 @@ Comprehensive contract health scorecard with current status, risk level, and per
 
 ---
 
+### 3. **`contract_status_historical`**
+
+**Grain**: One row per contract per month-end snapshot
+
+Time-series tracking of contract portfolio health with monthly granularity.
+Enables trend analysis, cohort performance tracking, and historical reporting.
+
+**Key Metrics and Status Classifications**: 
+Same as **`contract_status_current`**
+
+**Use Cases**:
+- Month-over-month portfolio health trends
+- Risk migration analysis (contracts moving between risk categories)
+- Cohort performance comparison
+- Executive month-end reporting
+- Year-over-year growth metrics
+
+
+---
+
 ## 🧪 Data Quality & Testing
 
 ### Test Coverage
@@ -182,6 +202,7 @@ Comprehensive contract health scorecard with current status, risk level, and per
   - Total paid ≤ total contract value
   - Cycles paid + unpaid = total cycles
   - Payment timing categories are valid
+
 
 ### Running Tests
 
