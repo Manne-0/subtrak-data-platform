@@ -283,4 +283,161 @@ models:
           - not_null
           - accepted_values:
               values: ['good_standing', 'low_risk', 'medium_risk', 'high_risk']
-   
+
+
+
+
+  - name: contract_status_historical
+    description: |
+      **Contract Status Historical - Monthly Snapshots**
+      
+      Time-series tracking of contract portfolio health with monthly granularity.
+      Enables trend analysis, cohort performance tracking, and historical reporting.
+      
+      **Grain**: One row per contract per month-end snapshot
+      
+      **Update Strategy**: 
+      - Current: Full refresh (demo dataset)
+      - Production: Incremental append (new month only)
+      - Schedule: Monthly on 1st day of month
+      
+
+    tests:
+      # Table-level tests
+      
+      - dbt_utils.expression_is_true:
+          expression: "cycles_paid + cycles_unpaid = total_billing_cycles"
+          config:
+            severity: warn
+
+    columns:
+      - name: historical_status_key
+        description: "Surrogate key combining contract_id and snapshot_date"
+        tests:
+          - unique
+          - not_null
+      
+      - name: snapshot_date
+        description: "Month-end date of this snapshot (last day of month)"
+        tests:
+          - not_null
+      
+      - name: snapshot_month_key
+        description: "Year-month key for grouping (YYYY-MM format)"
+        tests:
+          - not_null
+      
+      - name: contract_id
+        description: "Unique contract identifier"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_contracts')
+              field: contract_id
+      
+      - name: customer_id
+        description: "Foreign key to customers"
+        tests:
+          - not_null
+      
+      - name: deal_id
+        description: "Foreign key to deals/products"
+        tests:
+          - not_null
+      
+      - name: sales_rep_id
+        description: "Foreign key to sales representative"
+        tests:
+          - not_null
+      
+      - name: contract_start_date
+        description: "Date contract began"
+        tests:
+          - not_null
+      
+      - name: contract_end_date
+        description: "Expected contract end date"
+        tests:
+          - not_null
+            
+      - name: total_billing_cycles
+        description: "Total number of billing periods for this contract as of snapshot date"
+        tests:
+          - not_null
+      
+      - name: cycles_paid
+        description: "Number of billing cycles paid as of snapshot date"
+        tests:
+          - not_null
+      
+      - name: cycles_unpaid
+        description: "Number of billing cycles unpaid as of snapshot date"
+        tests:
+          - not_null
+      
+      - name: total_amount_paid
+        description: "Total amount paid as of snapshot date"
+
+      
+      - name: total_amount_outstanding
+        description: "Total amount still owed as of snapshot date"
+
+      
+      - name: ontime_payments
+        description: "Count of on-time payments as of snapshot date"
+        tests:
+          - not_null
+      
+      - name: late_payments
+        description: "Count of late/grace period payments as of snapshot date"
+        tests:
+          - not_null
+      
+      - name: last_due_date
+        description: "Most recent due date as of snapshot date"
+      
+      - name: last_payment_date
+        description: "Date of most recent payment as of snapshot date"
+      
+      - name: next_due_date
+        description: "Next upcoming payment due date as of snapshot date"
+      
+      - name: days_overdue
+        description: "Days payment is overdue as of snapshot date (0 if current)"
+        tests:
+          - not_null
+      
+      - name: system_status
+        description: |
+          System operational status as of snapshot date:
+          - completed: All payments made
+          - enabled: Service active (before next due date)
+          - locked: Service suspended (payment overdue)
+          - unknown: Edge case/insufficient data
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'enabled', 'locked', 'unknown']
+      
+      - name: contract_status
+        description: |
+          Business status classification as of snapshot date:
+          - owner: Completed all payments and past contract end date
+          - active: Contract ongoing, not in severe default
+          - lost: 90+ days in default (business write-off)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['owner', 'active', 'lost']
+      
+      - name: risk_category
+        description: |
+          Risk classification based on days overdue as of snapshot date:
+          - good_standing: 0-5 days overdue
+          - low_risk: 6-29 days overdue
+          - medium_risk: 30-60 days overdue
+          - high_risk: 61+ days overdue
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['good_standing', 'low_risk', 'medium_risk', 'high_risk']
