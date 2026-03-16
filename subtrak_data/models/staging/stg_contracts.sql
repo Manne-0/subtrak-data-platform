@@ -4,6 +4,7 @@ select
     rep_id as sales_rep_id,
     deal_id,
     contract_start as start_date,
+    contract_end as end_date,
     system_id,
     contract_status
 from {{ source('subtrak_oltp', 'contracts') }}

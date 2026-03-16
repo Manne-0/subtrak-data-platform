@@ -1,7 +1,7 @@
 
 select
     id as customer_id,
-    initcap(concat(first_name, ' ', last_name)) as customers_fullname,
+    initcap(concat(first_name, ' ', last_name)) as customer_fullname,
     email,
     phone_number,
     gender,
