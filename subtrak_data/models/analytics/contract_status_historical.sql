@@ -41,7 +41,6 @@ contract_metrics as
         min(bc.cost_price) cost_price,
         
         max(case when bc.contract_start_date <= me.snapshot_date and bc.payment_date is not null and bc.payment_date <= me.snapshot_date then bc.total_paid end) as total_amount_paid,
-        sum(case when bc.contract_start_date <= me.snapshot_date and (bc.payment_date is null or bc.payment_date > me.snapshot_date) then bc.expected_amount end) as total_amount_outstanding,
         
         sum(case when bc.contract_start_date <= me.snapshot_date and (bc.payment_date <= me.snapshot_date and bc.payment_timing = 'on-time') then 1 else 0 end) as ontime_payments,
         sum(case when bc.contract_start_date <= me.snapshot_date and (bc.payment_date <= me.snapshot_date and bc.payment_timing in ('grace_period', 'late')) then 1 else 0 end) as late_payments,
@@ -70,11 +69,12 @@ select
     c.start_date as contract_start_date,
     (c.start_date + (d.deal_duration * interval '30 days'))::date as contract_end_date,
     d.plan,
+    cm.cost_price,
     cm.total_billing_cycles,
     cm.cycles_paid,
     cm.cycles_unpaid,
     cm.total_amount_paid,
-    cm.total_amount_outstanding,
+    cm.cost_price - cm.total_amount_paid as total_amount_outstanding,
     cm.ontime_payments,
     cm.late_payments,
     cm.last_due_date,

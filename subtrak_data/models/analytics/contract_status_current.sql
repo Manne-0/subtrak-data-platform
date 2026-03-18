@@ -27,8 +27,7 @@ contract_metrics as
 		count(case when payment_date is null then contract_id end) as cycles_unpaid,
 	
 		min(cost_price) cost_price,
-		max(case when payment_date is not null then total_paid end) as total_amount_paid,
-		sum(case when payment_date is null then expected_amount end) as total_amount_outstanding,
+		max(case when payment_date is not null then expected_amount end) as total_amount_paid,
 	
 	
 		sum(case when payment_timing = 'on-time' then 1 else 0 end) as ontime_payments,
@@ -59,11 +58,12 @@ contract_status as
 		(c.start_date + (d.deal_duration * interval '30 days'))::date as contract_end_date,
 		d.plan,
 
+        cm.cost_price,
 		cm.total_billing_cycles,
 		cm.cycles_paid,
 		cm.cycles_unpaid,
 		cm.total_amount_paid,
-		cm.total_amount_outstanding,
+		cm.cost_price - cm.total_amount_paid as total_amount_outstanding,
 		cm.ontime_payments,
 		cm.late_payments,
 		cm.last_due_date,
