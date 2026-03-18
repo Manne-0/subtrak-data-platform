@@ -266,66 +266,7 @@ dbt docs generate
 dbt docs serve
 ```
 
----
 
-## 📈 Example Queries
-
-See [`example_queries.sql`](example_queries.sql) for ready-to-use analytical queries including:
-
-1. **Executive Dashboard**
-   - Current portfolio overview
-   - Risk distribution
-   - Monthly collections performance
-
-2. **Rep Performance**
-   - Rep performance scorecard
-   - Incentive qualification summary
-
-3. **Payment Behavior**
-   - Payment timing distribution
-   - First payment analysis
-
-4. **Cohort Analysis**
-   - Contract cohorts by signup month
-   - Completion and loss rates
-
-5. **Product Analysis**
-   - Product performance by deal type
-   - Revenue realization
-
-6. **Risk Management**
-   - Early warning indicators
-   - High-risk contract identification
-
----
-
-## 📊 Key Business Insights
-
-### Example: Portfolio Health (as of current date)
-
-```sql
-SELECT 
-    business_status,
-    COUNT(*) as contracts,
-    SUM(total_contract_value) as total_value,
-    SUM(total_amount_paid) as collected,
-    ROUND(AVG(percent_paid), 2) as avg_completion
-FROM analytics.contract_status_current
-GROUP BY business_status;
-```
-
-### Example: Rep Incentive Qualification
-
-```sql
-SELECT 
-    rep_name,
-    incentive_qualified_payments,
-    total_payments,
-    ROUND(incentive_qualification_rate, 2) || '%' as qualification_rate
-FROM rep_incentive_summary
-WHERE payment_month = CURRENT_DATE
-ORDER BY incentive_qualification_rate DESC;
-```
 
 ---
 
